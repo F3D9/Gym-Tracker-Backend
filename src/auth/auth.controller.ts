@@ -2,22 +2,38 @@ import { Controller, Post, HttpCode, HttpStatus, Body, Get, UseGuards, Request, 
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { UserDto } from 'src/dtos/user.dto';
-import {AuthGuard} from './auth.guards';
+import { AuthGuard } from './auth.guards';
 
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: true,
+  sameSite: 'none' as const,
+  maxAge: 2 * 24 * 60 * 60 * 1000, // 7 días, ajustá si querés otro valor
+};
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
-  register(@Body() data: UserDto) {
-    return this.authService.register(data);
+  async register(
+    @Body() data: UserDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.authService.register(data);
+    res.cookie('jwt', result.accessToken, COOKIE_OPTIONS);
+    return result;
   }
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  login(@Body() input: { email: string; password: string }) {
-    return this.authService.login(input);
+  async login(
+    @Body() input: { email: string; password: string },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.authService.login(input);
+    res.cookie('jwt', result.accessToken, COOKIE_OPTIONS);
+    return result;
   }
 
   @UseGuards(AuthGuard)
@@ -28,8 +44,7 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  logout(@Res({ passthrough: true }) res:Response) {
+  logout(@Res({ passthrough: true }) res: Response) {
     return this.authService.logout(res);
   }
-
 }
