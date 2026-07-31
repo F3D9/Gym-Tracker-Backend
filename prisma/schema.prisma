@@ -1,0 +1,115 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum SetType {
+  NORMAL
+  WARMUP
+  DROPSET
+  TOPSET
+  BACKOFF
+  ASSISTED
+  SUPERSET
+}
+
+model User {
+  user_id          Int                @id @default(autoincrement())
+  email            String             @unique
+  name             String?
+  password         String
+  routines         Routine[]
+  custom_exercises Exercise[]
+  exercise_data    UserExerciseData[]
+  workouts         Workout[]
+}
+
+model Routine {
+  routine_id     Int       @id @default(autoincrement())
+  name           String
+  user_id        Int
+  user           User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  sets           Set[]
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+  exercise_count Int
+  workouts       Workout[]
+}
+
+// Catálogo de ejercicios. user_id null = global, con valor = custom de ese usuario
+model Exercise {
+  exercise_id Int                @id @default(autoincrement())
+  name        String
+  description String?
+  photo_url   String?
+  user_id     Int?
+  user        User?              @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  sets        Set[]
+  user_data   UserExerciseData[]
+  workoutSets WorkoutSet[]
+}
+
+model UserExerciseData {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  user        User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  exercise_id Int
+  exercise    Exercise @relation(fields: [exercise_id], references: [exercise_id], onDelete: Cascade)
+
+  max_weight Float?
+  max_volume Float?
+
+  pr_set_id Int? @unique
+  pr_set    WorkoutSet? @relation("UserExercisePRSet", fields: [pr_set_id], references: [workout_set_id])
+
+  updated_at DateTime @updatedAt
+
+  @@unique([user_id, exercise_id]) // un solo registro por user+ejercicio
+}
+
+model Set {
+  set_id             Int               @id @default(autoincrement())
+  routine_id         Int
+  routine            Routine           @relation(fields: [routine_id], references: [routine_id], onDelete: Cascade)
+  exercise_id        Int
+  exercise           Exercise          @relation(fields: [exercise_id], references: [exercise_id])
+  exercise_order     Int
+  set_order          Int
+  reps               Int
+  weight             Float
+  set_type           SetType           @default(NORMAL)
+
+  @@unique([routine_id, exercise_id, exercise_order, set_order])
+}
+
+model Workout {
+  workout_id     Int          @id @default(autoincrement())
+  user_id        Int
+  user           User         @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  routine_id     Int?
+  routine        Routine?     @relation(fields: [routine_id], references: [routine_id], onDelete: SetNull)
+  started_at     DateTime     @default(now())
+  duration       Int // segundos
+  total_volume   Int // suma de reps * weight de los sets completados
+  exercise_count Int // cantidad de ejercicios distintos
+  sets           WorkoutSet[]
+}
+
+model WorkoutSet {
+  workout_set_id Int      @id @default(autoincrement())
+  workout_id     Int
+  workout        Workout  @relation(fields: [workout_id], references: [workout_id], onDelete: Cascade)
+  exercise_id    Int
+  exercise       Exercise @relation(fields: [exercise_id], references: [exercise_id])
+  exercise_order Int
+  set_order      Int
+  reps           Int
+  weight         Float
+  set_type       SetType  @default(NORMAL)
+  prRecord       UserExerciseData? @relation("UserExercisePRSet")
+}
