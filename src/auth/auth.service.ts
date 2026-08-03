@@ -40,7 +40,12 @@ export class AuthService {
     }
 
     async logout(res:Response){
-        res.clearCookie('jwt', { path: '/' });
+        res.clearCookie('jwt', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            path: '/',
+        })
         return { message: 'Logout exitoso' };
     }
 
