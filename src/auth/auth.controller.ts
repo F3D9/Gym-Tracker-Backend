@@ -38,8 +38,8 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('me')
-  getMe(@Request() req: any) {
-    return req.user;
+  getMe(@Res({ passthrough: true }) res: Response) {
+    return res.locals.user;
   }
 
   @Post('logout')
