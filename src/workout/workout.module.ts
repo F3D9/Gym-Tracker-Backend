@@ -6,6 +6,7 @@ import { AuthModule } from 'src/auth/auth.module';
 @Module({
   imports: [AuthModule],
   controllers: [WorkoutController],
-  providers: [WorkoutService]
+  providers: [WorkoutService],
+  exports:[WorkoutService]
 })
 export class WorkoutModule {}

@@ -20,9 +20,10 @@ enum SetType {
 
 model User {
   user_id          Int                @id @default(autoincrement())
-  email            String             @unique
+  email            String?             @unique
   name             String?
-  password         String
+  password         String?
+  isGuest          Boolean  @default(false)
   routines         Routine[]
   custom_exercises Exercise[]
   exercise_data    UserExerciseData[]

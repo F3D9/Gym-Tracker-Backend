@@ -8,7 +8,14 @@ const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: true,
   sameSite: 'none' as const,
-  maxAge: 2 * 24 * 60 * 60 * 1000, // 7 días, ajustá si querés otro valor
+  maxAge: 2 * 24 * 60 * 60 * 1000, // 2 días
+};
+
+const GUEST_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: true,
+  sameSite: 'none' as const,
+  maxAge: 2 * 60 * 60 * 1000, // 2 horas
 };
 
 @Controller('auth')
@@ -46,5 +53,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   logout(@Res({ passthrough: true }) res: Response) {
     return this.authService.logout(res);
+  }
+
+  @Post('guest')
+  async loginAsGuest() {
+    return this.authService.createGuest();
   }
 }

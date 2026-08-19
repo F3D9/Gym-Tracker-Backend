@@ -10,11 +10,11 @@ import { AuthGuard } from './auth.guards';
   providers: [AuthService, AuthGuard],
   imports: [UsersModule,
     JwtModule.registerAsync({
-      useFactory: () => ({
-        secret: process.env.JWT_SECRET,
-        signOptions: { expiresIn: '7d' },
-      }),
-    }),
+          useFactory: () => ({
+            secret: process.env.JWT_SECRET,
+            signOptions: { expiresIn: '7d' },
+          }),
+        }),
   ],
   exports: [AuthGuard,JwtModule]
 

@@ -125,6 +125,13 @@ export class WorkoutService {
         });
     }
 
+    async deleteWorkoutsByUser(id:number){
+        return this.prisma.workout.deleteMany({
+            where: { user_id: id }
+        });
+    }
+
+
     async getLastWorkoutByRoutine(userId: number, routineId: number) {
         const lastWorkout = await this.prisma.workout.findFirst({
             where: {

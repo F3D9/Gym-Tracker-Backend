@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -13,6 +13,9 @@ export class AuthService {
     ) {}
 
     async register(data: UserDto) {
+        if (!data.password) {
+            throw new BadRequestException('Password is required');
+        }
         const hashedPassword = await bcrypt.hash(data.password, 10);
         const user = await this.userService.createUser({
         ...data,
@@ -23,7 +26,7 @@ export class AuthService {
 
     async login(input: { email: string; password: string }) {
         const user = await this.userService.getUserByEmail(input.email);
-        if (!user) throw new UnauthorizedException('Invalid credentials');
+        if (!user || !user.password) throw new UnauthorizedException('Invalid credentials');
 
         const passwordMatch = await bcrypt.compare(input.password, user.password);
         if (!passwordMatch) throw new UnauthorizedException('Invalid credentials');
@@ -31,7 +34,7 @@ export class AuthService {
         return this.sign({ userId: user.user_id, email: user.email });
     }
 
-    async sign(user: { userId: number; email: string }) {
+    async sign(user: { userId: number; email: string | null }) {
         const accessToken = await this.jwtService.signAsync({
         user_id: user.userId,
         email: user.email,
@@ -48,6 +51,25 @@ export class AuthService {
         })
         return { message: 'Logout exitoso' };
     }
+
+    private readonly GUEST_EMAIL = 'guest@gymtracker.app';
+
+    async createGuest() {
+        const guestUser = await this.userService.createUser({
+            isGuest: true,
+            name: `Invitado-${Date.now()}`,
+            email: null,
+            password: null,
+        });
+
+        const payload = { sub: guestUser.user_id, isGuest: true };
+        const token = this.jwtService.sign(payload);
+
+        return {
+            accessToken: token,
+            user: guestUser,
+        };
+        }
 
 
 }

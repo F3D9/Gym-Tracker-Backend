@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: ['https://f3d9.github.io/Gym-Tracker-Frontend','https://f3d9.github.io', 'http://localhost:5173/Gym-Tracker-Frontend'],
+    origin: ['https://f3d9.github.io/Gym-Tracker-Frontend','https://f3d9.github.io', 'http://localhost:5173/Gym-Tracker-Frontend', 'http://localhost:5173'],
     credentials: true,
   });
   app.useGlobalPipes(new ValidationPipe({transform: true}));

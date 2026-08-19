@@ -6,7 +6,8 @@ import { NotFoundException } from '@nestjs/common';
 @Injectable()
 export class RoutinesService {
 
-    constructor(private prisma: PrismaService) {}
+    constructor(private prisma: PrismaService) {
+    }
     
     async getAllRoutines(id: number) {
         return this.prisma.routine.findMany({
@@ -98,4 +99,12 @@ export class RoutinesService {
             where: { routine_id: id }
         });
     }
+
+    async deleteRoutinesByUser(id:number){
+        return this.prisma.routine.deleteMany({
+            where: { routine_id: id }
+        });
+    }
+
+    
 }
