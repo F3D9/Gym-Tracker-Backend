@@ -52,8 +52,6 @@ export class AuthService {
         return { message: 'Logout exitoso' };
     }
 
-    private readonly GUEST_EMAIL = 'guest@gymtracker.app';
-
     async createGuest() {
         const guestUser = await this.userService.createUser({
             isGuest: true,
@@ -69,7 +67,7 @@ export class AuthService {
             accessToken: token,
             user: guestUser,
         };
-        }
+    }
 
 
 }

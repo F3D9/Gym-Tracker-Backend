@@ -56,7 +56,9 @@ export class AuthController {
   }
 
   @Post('guest')
-  async loginAsGuest() {
-    return this.authService.createGuest();
+  async loginAsGuest(@Res({ passthrough: true }) res: Response) {
+    const result = await this.authService.createGuest();
+    res.cookie('jwt', result.accessToken, GUEST_COOKIE_OPTIONS);
+    return result;
   }
 }
