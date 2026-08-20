@@ -60,7 +60,7 @@ export class AuthService {
             password: null,
         });
 
-        const payload = { sub: guestUser.user_id, isGuest: true };
+        const payload = { user_id: guestUser.user_id, email:null };
         const token = this.jwtService.sign(payload);
 
         return {
